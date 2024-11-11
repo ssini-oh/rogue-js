@@ -40,7 +40,7 @@ const battle = async (stage, player, monster) => {
 
     logs.forEach((log) => console.log(log));
 
-    console.log(chalk.green(`\n1. 공격한다 2. 아무것도 하지않는다.`));
+    console.log(chalk.green(`\n1. 공격한다 2. 도망친다`));
     const choice = readlineSync.question('당신의 선택은? ');
 
     // 플레이어의 선택에 따라 다음 행동 처리
