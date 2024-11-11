@@ -2,20 +2,26 @@ import chalk from 'chalk';
 import readlineSync from 'readline-sync';
 
 class Player {
+  static INITIAL_HP = 50;
+
   constructor() {
-    this.hp = 50;
+    this.hp = Player.INITIAL_HP;
     this.attackPower = 10;
   }
 
   attack() {
     return this.attackPower;
   }
+
+  reset() {
+    this.hp = Player.INITIAL_HP;
+  }
 }
 
 class Monster {
   constructor() {
     this.hp = 50;
-    this.attackPower = 30;
+    this.attackPower = 5;
   }
 
   attack() {
@@ -154,7 +160,7 @@ export async function startGame() {
 
     // 스테이지 클리어 및 게임 종료 조건
     stage.nextStage();
-    // player.hp = 50;
+    player.reset();
   }
 
   if (player.hp <= 0) {
