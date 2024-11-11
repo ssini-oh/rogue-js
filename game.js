@@ -3,8 +3,8 @@ import readlineSync from 'readline-sync';
 
 class Player {
   constructor() {
-    this.hp = 100;
-    this.attackPower = 10;
+    this.hp = 50;
+    this.attackPower = 50;
   }
 
   attack() {
@@ -13,13 +13,24 @@ class Player {
 }
 
 class Monster {
-  constructor(stage) {
-    this.hp = 100;
+  constructor() {
+    this.hp = 50;
     this.attackPower = 5;
   }
 
   attack() {
     return this.attackPower;
+  }
+}
+
+class Stage {
+  constructor() {
+    this.start = 1;
+    this.end = 4;
+  }
+
+  nextStage() {
+    return this.start++;
   }
 }
 
@@ -121,14 +132,21 @@ const battle = async (stage, player, monster) => {
 export async function startGame() {
   console.clear();
   const player = new Player();
-  let stage = 1;
+  const stage = new Stage();
+  // let stage = 1;
 
-  while (stage <= 10) {
-    const monster = new Monster(stage);
-    await battle(stage, player, monster);
+  while (stage.start <= stage.end) {
+    const monster = new Monster();
+    await battle(stage.start, player, monster);
 
     // 스테이지 클리어 및 게임 종료 조건
-    stage++;
-    player.hp = 100;
+    stage.nextStage();
+    player.hp = 50;
+  }
+
+  if (player.hp <= 0) {
+    console.log(chalk.bgRed('당신은 전사하였습니다...'));
+  } else if (stage > 4) {
+    console.log(chalk.bgGreen('축하합니다! 게임을 클리어하셨습니다!'));
   }
 }
