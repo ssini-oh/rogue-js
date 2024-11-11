@@ -4,7 +4,7 @@ import readlineSync from 'readline-sync';
 class Player {
   constructor() {
     this.hp = 50;
-    this.attackPower = 20;
+    this.attackPower = 10;
   }
 
   attack() {
@@ -15,7 +15,7 @@ class Player {
 class Monster {
   constructor() {
     this.hp = 50;
-    this.attackPower = 5;
+    this.attackPower = 30;
   }
 
   attack() {
@@ -65,7 +65,7 @@ const battle = async (stage, player, monster) => {
       case '1':
         // 플레이어 공격
         const playerAttack = player.attack();
-        monster.hp -= playerAttack;
+        monster.hp = Math.max(0, monster.hp - playerAttack);
         logs.push(chalk.green(`당신은 몬스터에게 [ ${playerAttack} ]의 피해를 입혔습니다.`));
 
         // 플레이어 공격 로그 출력 후 n초 대기
@@ -77,7 +77,7 @@ const battle = async (stage, player, monster) => {
         // 몬스터 반격
         if (monster.hp > 0) {
           const monsterAttack = monster.attack();
-          player.hp -= monsterAttack;
+          player.hp = Math.max(0, player.hp - monsterAttack);
 
           // 몬스터 반격 로그 추가
           logs.push(
@@ -103,6 +103,15 @@ const battle = async (stage, player, monster) => {
           } else {
             return;
           }
+        }
+
+        // 플레이어 사망 체크
+        if (player.hp <= 0) {
+          console.clear();
+          displayStatus(stage, player, monster);
+          logs.forEach((log) => console.log(log));
+
+          return;
         }
         break;
 
@@ -145,11 +154,11 @@ export async function startGame() {
 
     // 스테이지 클리어 및 게임 종료 조건
     stage.nextStage();
-    player.hp = 50;
+    // player.hp = 50;
   }
 
   if (player.hp <= 0) {
-    console.log(chalk.bgRed('당신은 전사하였습니다...'));
+    console.log(chalk.bgRed('...당신은 전사하였습니다'));
   } else if (stage.start > stage.end) {
     console.log(chalk.bgGreen('축하합니다! 게임을 클리어하셨습니다!'));
   }
