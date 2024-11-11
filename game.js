@@ -92,6 +92,22 @@ const battle = async (stage, player, monster) => {
 
       //---- 도망친다 선택 시
       case '2':
+        logs.push(chalk.yellow(`이건 전략상의 후퇴입니다...!`));
+
+        console.clear();
+        displayStatus(stage, player, monster);
+        logs.forEach((log) => console.log(log));
+
+        console.log(chalk.green(`\n1. 다음 스테이지로 이동 2. 게임 종료`));
+        const escapeChoice = readlineSync.question('당신의 선택은? ');
+
+        if (escapeChoice === '1') {
+          return; // 다음 스테이지로 이동
+        } else if (escapeChoice === '2') {
+          process.exit();
+        } else {
+          logs.push(chalk.red('선택지에 있는 숫자를 입력해주세요.'));
+        }
         break;
 
       default: // 유효하지 않은 입력
