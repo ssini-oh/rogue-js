@@ -4,7 +4,7 @@ import readlineSync from 'readline-sync';
 class Player {
   constructor() {
     this.hp = 50;
-    this.attackPower = 50;
+    this.attackPower = 20;
   }
 
   attack() {
@@ -26,7 +26,7 @@ class Monster {
 class Stage {
   constructor() {
     this.start = 1;
-    this.end = 4;
+    this.end = 3;
   }
 
   nextStage() {
@@ -38,7 +38,7 @@ class Stage {
 function displayStatus(stage, player, monster) {
   console.log(chalk.magentaBright(`\n=== Current Status ===`));
   console.log(
-    chalk.cyanBright(`| Stage: ${stage} `) +
+    chalk.cyanBright(`| Stage: ${stage.start} `) +
       chalk.blueBright(`| Player: HP ${player.hp}, Attack: ${player.attackPower} `) +
       chalk.redBright(`| Monster HP ${monster.hp}, Attack: ${monster.attackPower} |`),
   );
@@ -68,11 +68,11 @@ const battle = async (stage, player, monster) => {
         monster.hp -= playerAttack;
         logs.push(chalk.green(`당신은 몬스터에게 [ ${playerAttack} ]의 피해를 입혔습니다.`));
 
-        // 플레이어 공격 로그 출력 후 1초 대기
+        // 플레이어 공격 로그 출력 후 n초 대기
         console.clear();
         displayStatus(stage, player, monster);
         logs.forEach((log) => console.log(log));
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 400));
 
         // 몬스터 반격
         if (monster.hp > 0) {
@@ -81,7 +81,7 @@ const battle = async (stage, player, monster) => {
 
           // 몬스터 반격 로그 추가
           logs.push(
-            chalk.redBright(`몬스터가 당신에게 [ ${monsterAttack} ]의 피해를 입혔습니다.\n`),
+            chalk.redBright(`...몬스터가 당신에게 [ ${monsterAttack} ]의 피해를 입혔습니다.\n`),
           );
         } else {
           logs.push(chalk.green(`✨몬스터를 물리쳤습니다!✨`));
@@ -90,13 +90,18 @@ const battle = async (stage, player, monster) => {
           displayStatus(stage, player, monster);
           logs.forEach((log) => console.log(log));
 
-          console.log(chalk.green(`\n1. 다음 스테이지로 이동 2. 게임 종료`));
-          const clearChoice = readlineSync.question('당신의 선택은? ');
+          // 스테이지 클리어 여부에 따른 선택지 출력
+          if (stage.start !== stage.end) {
+            console.log(chalk.blue(`\n1. 다음 스테이지로 이동 2. 게임 종료`));
+            const clearChoice = readlineSync.question('당신의 선택은? ');
 
-          if (clearChoice === '1') {
-            return; // 다음 스테이지로 이동
-          } else if (clearChoice === '2') {
-            process.exit();
+            if (clearChoice === '1') {
+              return; // 다음 스테이지로 이동
+            } else if (clearChoice === '2') {
+              process.exit();
+            }
+          } else {
+            return;
           }
         }
         break;
@@ -133,11 +138,10 @@ export async function startGame() {
   console.clear();
   const player = new Player();
   const stage = new Stage();
-  // let stage = 1;
 
   while (stage.start <= stage.end) {
     const monster = new Monster();
-    await battle(stage.start, player, monster);
+    await battle(stage, player, monster);
 
     // 스테이지 클리어 및 게임 종료 조건
     stage.nextStage();
@@ -146,7 +150,7 @@ export async function startGame() {
 
   if (player.hp <= 0) {
     console.log(chalk.bgRed('당신은 전사하였습니다...'));
-  } else if (stage > 4) {
+  } else if (stage.start > stage.end) {
     console.log(chalk.bgGreen('축하합니다! 게임을 클리어하셨습니다!'));
   }
 }
