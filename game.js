@@ -1,12 +1,14 @@
 import chalk from 'chalk';
 import readlineSync from 'readline-sync';
 
+//---- 플레이어 클래스 정의
 class Player {
   static INITIAL_HP = 50;
+  static INITIAL_POWER = 30;
 
   constructor() {
     this.hp = Player.INITIAL_HP;
-    this.attackPower = 10;
+    this.attackPower = Player.INITIAL_POWER;
   }
 
   attack() {
@@ -18,10 +20,30 @@ class Player {
   }
 }
 
+//---- 몬스터 클래스 정의
 class Monster {
-  constructor() {
-    this.hp = 50;
-    this.attackPower = 5;
+  static INITIAL_HP = 50;
+  static INITIAL_POWER = 5;
+
+  static increasedStat(stat) {
+    // 1~20% 사이의 증가율
+    const increaseRate = 0.01 + Math.random() * 0.19;
+    return Math.floor(stat * (1 + increaseRate));
+  }
+
+  constructor(stage) {
+    if (stage === 1) {
+      // 기본 스탯
+      this.hp = Monster.INITIAL_HP;
+      this.attackPower = Monster.INITIAL_POWER;
+    } else {
+      // const prevMonster = new Monster(stage - 1);
+
+      // this.hp = Monster.increasedStat(prevMonster.hp);
+      // this.attackPower = Monster.increasedStat(prevMonster.attackPower);
+      this.hp = Monster.increasedStat(Monster.INITIAL_HP * Math.pow(1.1, stage - 1));
+      this.attackPower = Monster.increasedStat(Monster.INITIAL_POWER * Math.pow(1.1, stage - 1));
+    }
   }
 
   attack() {
@@ -29,6 +51,7 @@ class Monster {
   }
 }
 
+//---- 스테이지 클래스 정의
 class Stage {
   constructor() {
     this.start = 1;
@@ -155,10 +178,9 @@ export async function startGame() {
   const stage = new Stage();
 
   while (stage.start <= stage.end) {
-    const monster = new Monster();
+    const monster = new Monster(stage.start);
     await battle(stage, player, monster);
 
-    // 스테이지 클리어 및 게임 종료 조건
     stage.nextStage();
     player.reset();
   }

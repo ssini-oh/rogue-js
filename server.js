@@ -54,7 +54,7 @@ function handleUserInput() {
       break;
     case '2':
       console.log(chalk.yellow('구현 준비중입니다.. 게임을 시작하세요'));
-      // 업적 확인하기 로직을 구현
+      // 업적 확인             ap하기 로직을 구현
       handleUserInput();
       break;
     case '3':
