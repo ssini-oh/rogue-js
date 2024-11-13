@@ -37,10 +37,6 @@ class Monster {
       this.hp = Monster.INITIAL_HP;
       this.attackPower = Monster.INITIAL_POWER;
     } else {
-      // const prevMonster = new Monster(stage - 1);
-
-      // this.hp = Monster.increasedStat(prevMonster.hp);
-      // this.attackPower = Monster.increasedStat(prevMonster.attackPower);
       this.hp = Monster.increasedStat(Monster.INITIAL_HP * Math.pow(1.1, stage - 1));
       this.attackPower = Monster.increasedStat(Monster.INITIAL_POWER * Math.pow(1.1, stage - 1));
     }
@@ -85,8 +81,18 @@ const battle = async (stage, player, monster) => {
     // 전투 로그 출력
     logs.forEach((log) => console.log(log));
 
-    console.log(chalk.green(`\n1. 공격한다 2. 도망친다`));
+    // 유저 선택지 출력
+    let comboSuccessRate = Math.floor(Math.random() * 41) + 10;
+    let defenseSuccessRate = Math.floor(Math.random() * 41) + 10;
+
+    console.log(
+      chalk.green(
+        `\n1. 공격한다  2. 연속공격(${comboSuccessRate}%)  3. 방어한다(${defenseSuccessRate}%)  4. 도망친다`,
+      ),
+    );
     const choice = readlineSync.question('당신의 선택은? ');
+
+    const successRate = Math.random() * 100;
 
     // 플레이어의 선택에 따라 다음 행동 처리
     switch (choice) {
@@ -144,8 +150,79 @@ const battle = async (stage, player, monster) => {
         }
         break;
 
-      //---- 도망친다 선택 시
+      //---- 연속공격 선택 시
       case '2':
+        if (successRate < comboSuccessRate) {
+          const comboAttack = player.attack() * 2; // 2배 공격력
+
+          // 플레이어 hp 확률적 소모
+          const hpCostRate = 0.01 + Math.random() * 0.09;
+          const hpCost = Math.floor(player.hp * hpCostRate);
+
+          player.hp = Math.max(0, player.hp - hpCost);
+          monster.hp = Math.max(0, monster.hp - comboAttack);
+
+          logs.push(
+            chalk.green(`연속 공격 성공! 몬스터에게 [ ${comboAttack} ]의 피해를 입혔습니다!`),
+          );
+          logs.push(chalk.red(`연속 공격으로 인해 체력이 [ ${hpCost} ] 소모되었습니다.`));
+        } else {
+          logs.push(chalk.red(`연속 공격 실패! 몬스터가 반격합니다.`));
+          const monsterAttack = monster.attack();
+          player.hp = Math.max(0, player.hp - monsterAttack);
+
+          logs.push(
+            chalk.redBright(`...몬스터가 당신에게 [ ${monsterAttack} ]의 피해를 입혔습니다.`),
+          );
+        }
+
+        // 플레이어 사망 체크
+        if (player.hp <= 0) {
+          console.clear();
+          displayStatus(stage, player, monster);
+          logs.forEach((log) => console.log(log));
+
+          return;
+        }
+
+        break;
+
+      //---- 방어한다 선택 시
+      case '3':
+        if (successRate < defenseSuccessRate) {
+          logs.push(chalk.blue(`방어에 성공했습니다! 몬스터의 공격을 막아냈습니다.`));
+
+          // 패링 발생 여부 (30% 확률)
+          const parryRate = Math.random() * 100;
+          if (parryRate < 30) {
+            // 몬스터 공격력의 50% 반사
+            const parryDamage = Math.floor(monster.attack() * 0.5);
+            monster.hp = Math.max(0, monster.hp - parryDamage);
+            logs.push(
+              chalk.green(`패링 성공! 몬스터에게 [ ${parryDamage} ]의 피해를 반사했습니다!`),
+            );
+          }
+        } else {
+          logs.push(chalk.red(`방어에 실패했습니다! 몬스터의 반격을 그대로 받습니다.`));
+          const monsterAttack = monster.attack();
+          player.hp = Math.max(0, player.hp - monsterAttack);
+          logs.push(
+            chalk.redBright(`...몬스터가 당신에게 [ ${monsterAttack} ]의 피해를 입혔습니다.`),
+          );
+        }
+
+        // 플레이어 사망 체크
+        if (player.hp <= 0) {
+          console.clear();
+          displayStatus(stage, player, monster);
+          logs.forEach((log) => console.log(log));
+
+          return;
+        }
+        break;
+
+      //---- 도망친다 선택 시
+      case '4':
         logs.push(chalk.yellow(`이건 전략상의 후퇴입니다...!`));
 
         console.clear();
