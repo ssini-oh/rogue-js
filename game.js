@@ -6,17 +6,35 @@ class Player {
   static INITIAL_HP = 50;
   static INITIAL_POWER = 30;
 
-  constructor() {
-    this.hp = Player.INITIAL_HP;
-    this.attackPower = Player.INITIAL_POWER;
+  static increasedStat(stat) {
+    // 10~30% 사이의 증가율
+    const increaseRate = 0.1 + Math.random() * 0.2; // 10% ~ 30%
+    return Math.floor(stat * (1 + increaseRate));
+  }
+
+  constructor(stage) {
+    if (stage === 1) {
+      this.hp = Player.INITIAL_HP;
+      this.attackPower = Player.INITIAL_POWER;
+    } else {
+      this.hp = Player.increasedStat(Player.INITIAL_HP * Math.pow(1.1, stage - 1));
+      this.attackPower = Player.increasedStat(Player.INITIAL_POWER * Math.pow(1.1, stage - 1));
+    }
   }
 
   attack() {
     return this.attackPower;
   }
 
-  reset() {
-    this.hp = Player.INITIAL_HP;
+  // 스탯 증가 메서드
+  increaseStats() {
+    this.hp = Player.increasedStat(this.hp);
+    this.attackPower = Player.increasedStat(this.attackPower);
+    console.log(
+      chalk.green(
+        `스테이지 클리어! 체력이 ${this.hp}로, 공격력이 ${this.attackPower}로 증가했습니다.`,
+      ),
+    );
   }
 }
 
@@ -156,7 +174,7 @@ const battle = async (stage, player, monster) => {
           const comboAttack = player.attack() * 2; // 2배 공격력
 
           // 플레이어 hp 확률적 소모
-          const hpCostRate = 0.01 + Math.random() * 0.09;
+          const hpCostRate = 0.01 + Math.random() * 0.09; // 1~10% 사이 소모
           const hpCost = Math.floor(player.hp * hpCostRate);
 
           player.hp = Math.max(0, player.hp - hpCost);
@@ -174,6 +192,27 @@ const battle = async (stage, player, monster) => {
           logs.push(
             chalk.redBright(`...몬스터가 당신에게 [ ${monsterAttack} ]의 피해를 입혔습니다.`),
           );
+        }
+
+        // 몬스터 사망 체크
+        if (monster.hp <= 0) {
+          logs.push(chalk.green(`✨몬스터를 물리쳤습니다!✨`));
+
+          console.clear();
+          displayStatus(stage, player, monster);
+          logs.forEach((log) => console.log(log));
+
+          // 스테이지 클리어 여부에 따른 선택지 출력
+          if (stage.start !== stage.end) {
+            console.log(chalk.blue(`\n1. 다음 스테이지로 이동 2. 게임 종료`));
+            const clearChoice = readlineSync.question('당신의 선택은? ');
+
+            if (clearChoice === '1') {
+              return; // 다음 스테이지로 이동
+            } else if (clearChoice === '2') {
+              process.exit();
+            }
+          }
         }
 
         // 플레이어 사망 체크
@@ -209,6 +248,27 @@ const battle = async (stage, player, monster) => {
           logs.push(
             chalk.redBright(`...몬스터가 당신에게 [ ${monsterAttack} ]의 피해를 입혔습니다.`),
           );
+        }
+
+        // 몬스터 사망 체크
+        if (monster.hp <= 0) {
+          logs.push(chalk.green(`✨몬스터를 물리쳤습니다!✨`));
+
+          console.clear();
+          displayStatus(stage, player, monster);
+          logs.forEach((log) => console.log(log));
+
+          // 스테이지 클리어 여부에 따른 선택지 출력
+          if (stage.start !== stage.end) {
+            console.log(chalk.blue(`\n1. 다음 스테이지로 이동 2. 게임 종료`));
+            const clearChoice = readlineSync.question('당신의 선택은? ');
+
+            if (clearChoice === '1') {
+              return; // 다음 스테이지로 이동
+            } else if (clearChoice === '2') {
+              process.exit();
+            }
+          }
         }
 
         // 플레이어 사망 체크
@@ -251,15 +311,18 @@ const battle = async (stage, player, monster) => {
 //---- 게임 시작 함수
 export async function startGame() {
   console.clear();
-  const player = new Player();
   const stage = new Stage();
+  const player = new Player(stage.start);
 
   while (stage.start <= stage.end) {
     const monster = new Monster(stage.start);
     await battle(stage, player, monster);
 
-    stage.nextStage();
-    player.reset();
+    if (player.hp > 0) {
+      // 플레이어가 살아 있는 경우에만 다음 스테이지로 진행
+      player.increaseStats(); // 스탯 증가
+      stage.nextStage();
+    }
   }
 
   if (player.hp <= 0) {
