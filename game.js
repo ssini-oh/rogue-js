@@ -71,7 +71,7 @@ class Monster {
 class Stage {
   constructor() {
     this.start = 1;
-    this.end = 3;
+    this.end = 10;
   }
 
   nextStage() {
