@@ -96,8 +96,8 @@
 
 ## 사용된 기술
 
-- **JavaScript**: 게임 로직의 핵심 언어
-- **Node.js**: 서버 측에서 게임을 실행하기 위한 런타임 환경
-- **Chalk**: 터미널 출력에 색상을 추가하여 더 생동감 있는 CLI 경험을 제공
-- **Figlet**: 타이틀 화면의 ASCII 아트를 생성하여 게임에 개성을 더함
-- **Readline-Sync**: 사용자 입력을 동기적으로 처리하여 게임 진행을 더 직관적으로 만듬
+- **JavaScript**
+- **Node.js**
+- **Chalk**
+- **Figlet**
+- **Readline-Sync**
